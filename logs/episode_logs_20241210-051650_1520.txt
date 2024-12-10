@@ -1,0 +1,58 @@
+Experiment Parameters:
+agents_number: 2
+max_timestep: 100
+render: True
+preys_mode: 1
+game_mode: 1
+prioritization_scale: 0.5
+replay_steps: 10
+number_nodes: 256
+gpu_num: 2
+test: False
+Student_number: None
+recorder: False
+optimizer: Adam
+MARLAlgorithm: QMIX
+learning_rate: 5e-05
+batch_size: 32
+memory_capacity: 100
+reward_mode: 1
+episode_number: 30
+grid_size: 5
+first_step_memory: 0
+target_type: DQN
+max_random_moves: 0
+target_frequency: 10000
+gamma: 0.95
+maximum_exploration: 100000
+
+Episode 0, Score: 92, Final Step: 9, Goal: True
+Episode 1, Score: 53, Final Step: 48, Goal: True
+Episode 2, Score: 58, Final Step: 43, Goal: True
+Episode 3, Score: 96, Final Step: 5, Goal: True
+Episode 4, Score: 27, Final Step: 74, Goal: True
+Episode 5, Score: 97, Final Step: 4, Goal: True
+Episode 6, Score: 93, Final Step: 8, Goal: True
+Episode 7, Score: 55, Final Step: 46, Goal: True
+Episode 8, Score: 50, Final Step: 51, Goal: True
+Episode 9, Score: 74, Final Step: 27, Goal: True
+Episode 10, Score: 86, Final Step: 15, Goal: True
+Episode 11, Score: 19, Final Step: 82, Goal: True
+Episode 12, Score: 83, Final Step: 18, Goal: True
+Episode 13, Score: 92, Final Step: 9, Goal: True
+Episode 14, Score: 96, Final Step: 5, Goal: True
+Episode 15, Score: 86, Final Step: 15, Goal: True
+Episode 16, Score: 64, Final Step: 37, Goal: True
+Episode 17, Score: 88, Final Step: 13, Goal: True
+Episode 18, Score: 96, Final Step: 5, Goal: True
+Episode 19, Score: 65, Final Step: 36, Goal: True
+Episode 20, Score: 92, Final Step: 9, Goal: True
+Episode 21, Score: 69, Final Step: 32, Goal: True
+Episode 22, Score: 93, Final Step: 8, Goal: True
+Episode 23, Score: 75, Final Step: 26, Goal: True
+Episode 24, Score: 100, Final Step: 1, Goal: True
+Episode 25, Score: 83, Final Step: 18, Goal: True
+Episode 26, Score: 94, Final Step: 7, Goal: True
+Episode 27, Score: 74, Final Step: 27, Goal: True
+Episode 28, Score: 95, Final Step: 6, Goal: True
+Episode 29, Score: 93, Final Step: 8, Goal: True

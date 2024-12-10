@@ -6,6 +6,7 @@ Created on Tuesday Sep. 26 2023
 """
 import numpy as np
 import os
+import time
 import random
 import argparse
 import pandas as pd
@@ -29,7 +30,7 @@ def get_name_rewards(args):
 
     file_name_str = '_'.join([str(args[x]) for x in ARG_LIST])
 
-    return './results_predators_prey/rewards_files/' + file_name_str + '.csv'
+    return './results_predators_prey/rewards_file/' + file_name_str + '.csv'
 
 
 def get_name_timesteps(args):
@@ -63,91 +64,109 @@ class Environment(object):
         self.action_size = 5
         self.controller = controller(self.MARL_algorithm, arguments['agents_number'], self.action_size)
 
-    def run(self, agents, file1, file2):
+    def run(self, agents, file1, file2, params):
 
         total_step = 0
         rewards_list = []
         timesteps_list = []
         max_score = -10000
-        for episode_num in xrange(self.episodes_number):
-            state = self.env.reset()
-            if self.render:
-                self.env.render()
+        # for logging for displaying stuff.
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        pid = os.getpid()
+        log_file_path = "results_predators_prey/logs/episode_logs_{}_{}.txt".format(timestamp, pid)
+        log_dir = os.path.dirname(log_file_path)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
-            random_moves = random.randint(0, self.max_random_moves)
-
-            # create randomness in initial state
-            for _ in xrange(random_moves):
-                actions = [4 for _ in xrange(len(agents))]
-                state, _, _ = self.env.step(actions)
+        with open(log_file_path, 'w') as log_file:
+            # Write the parameter configuration at the top of the log file
+            log_file.write("Experiment Parameters:\n")
+            for key, value in params.items():
+                log_file.write("{}: {}\n".format(key, value))
+            log_file.write("\n")  # Add a blank line for readability
+            for episode_num in xrange(self.episodes_number):
+                state = self.env.reset()
                 if self.render:
                     self.env.render()
 
-            # converting list of positions to an array
-            state = np.array(state)
-            state = state.ravel()
+                random_moves = random.randint(0, self.max_random_moves)
 
-            done = False
-            reward_all = 0
-            time_step = 0
-            while not done and time_step < self.max_ts:
+                # create randomness in initial state
+                for _ in xrange(random_moves):
+                    actions = [4 for _ in xrange(len(agents))]
+                    state, _, _ = self.env.step(actions)
+                    if self.render:
+                        self.env.render()
 
-                # if self.render:
-                #     self.env.render()
-                actions = []
-                for agent in agents:
-                    actions.append(agent.greedy_actor(state))
-                next_state, reward, done = self.env.step(actions)
                 # converting list of positions to an array
-                next_state = np.array(next_state)
-                next_state = next_state.ravel()
+                state = np.array(state)
+                state = state.ravel()
+
+                done = False
+                reward_all = 0
+                time_step = 0
+                while not done and time_step < self.max_ts:
+
+                    # if self.render:
+                    #     self.env.render()
+                    actions = []
+                    for agent in agents:
+                        actions.append(agent.greedy_actor(state))
+                    next_state, reward, done = self.env.step(actions)
+                    # converting list of positions to an array
+                    next_state = np.array(next_state)
+                    next_state = next_state.ravel()
+
+                    if not self.test:
+                        for agent in agents:
+                            agent.observe((state, actions, reward, next_state, done))
+                            if total_step >= self.filling_steps:
+                                agent.decay_epsilon()
+                        if time_step % self.steps_b_updates == 0:
+                            self.controller.replay(agents)
+
+                    total_step += 1
+                    time_step += 1
+                    state = next_state
+                    reward_all += reward
+
+                    if self.render:
+                        self.env.render()
+
+                rewards_list.append(reward_all)
+                timesteps_list.append(time_step)
+                log_line = "Episode {p}, Score: {s}, Final Step: {t}, Goal: {g}\n".format(
+                    p=episode_num, s=reward_all, t=time_step, g=done)
+                log_file.write(log_line)  # Save to external file
+                print(log_line.strip())  # Print to console
+
+                # print("Episode {p}, Score: {s}, Final Step: {t}, Goal: {g}".format(p=episode_num, s=reward_all,
+                #                                                                   t=time_step, g=done))
+                if self.recorder:
+                    os.system("ffmpeg -r 4 -i ./results_predators_prey/snaps/%04d.png -b:v 40000 -minrate 40000 -maxrate 4000k -bufsize 1835k -c:v mjpeg -qscale:v 0 "
+                              + "./results_predators_prey/videos/{a1}_{a2}_{a3}_{a4}_{a5}.avi".format(a1=self.num_predators,
+                                                                                                a2=self.num_preys,
+                                                                                                a3=self.preys_mode,
+                                                                                                a4=self.game_mode,
+                                                                                                a5=self.grid_size))
+
+                    files = glob.glob('./results_predators_prey/snaps/*')
+                    for f in files:
+                        os.remove(f)
 
                 if not self.test:
-                    for agent in agents:
-                        agent.observe((state, actions, reward, next_state, done))
+                    if episode_num % 100 == 0:
+                        df = pd.DataFrame(rewards_list, columns=['score'])
+                        df.to_csv(file1)
+
+                        df = pd.DataFrame(timesteps_list, columns=['steps'])
+                        df.to_csv(file2)
+
                         if total_step >= self.filling_steps:
-                            agent.decay_epsilon()
-                    if time_step % self.steps_b_updates == 0:
-                        self.controller.replay(agents)
-                            
-                total_step += 1
-                time_step += 1
-                state = next_state
-                reward_all += reward
-
-                if self.render:
-                    self.env.render()
-
-            rewards_list.append(reward_all)
-            timesteps_list.append(time_step)
-
-            print("Episode {p}, Score: {s}, Final Step: {t}, Goal: {g}".format(p=episode_num, s=reward_all,
-                                                                               t=time_step, g=done))
-            if self.recorder:
-                os.system("ffmpeg -r 4 -i ./results_predators_prey/snaps/%04d.png -b:v 40000 -minrate 40000 -maxrate 4000k -bufsize 1835k -c:v mjpeg -qscale:v 0 "
-                          + "./results_predators_prey/videos/{a1}_{a2}_{a3}_{a4}_{a5}.avi".format(a1=self.num_predators,
-                                                                                            a2=self.num_preys,
-                                                                                            a3=self.preys_mode,
-                                                                                            a4=self.game_mode,
-                                                                                            a5=self.grid_size))
-
-                files = glob.glob('./results_predators_prey/snaps/*')
-                for f in files:
-                    os.remove(f)
-
-            if not self.test:
-                if episode_num % 100 == 0:
-                    df = pd.DataFrame(rewards_list, columns=['score'])
-                    df.to_csv(file1)
-
-                    df = pd.DataFrame(timesteps_list, columns=['steps'])
-                    df.to_csv(file2)
-
-                    if total_step >= self.filling_steps:
-                        if reward_all > max_score:
-                            for agent in agents:
-                                agent.brain.save_model()
-                            max_score = reward_all
+                            if reward_all > max_score:
+                                for agent in agents:
+                                    agent.brain.save_model()
+                                max_score = reward_all
 
 
 if __name__ =="__main__":
@@ -222,4 +241,4 @@ if __name__ =="__main__":
     rewards_file = get_name_rewards(args)
     timesteps_file = get_name_timesteps(args)
 
-    env.run(all_agents, rewards_file, timesteps_file)
+    env.run(all_agents, rewards_file, timesteps_file, args)

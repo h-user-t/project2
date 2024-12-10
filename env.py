@@ -176,22 +176,26 @@ class PredatorsPrey(object):
         
         ########################
 
-        # Find the current prey position
+        # find the current prey position
         prey_pos = self.preys_positions[0]
 
-        # Get all possible neighbors of the prey
+        # get all possible neighbors of the prey
         [neighbors_pos, action_to_neighbor] = self.neighbor_finder(prey_pos)
 
-        # Calculate the distances to the nearest predator from each possible move
+        # calculate the distances to the nearest predator from each possible move
         distances = []
         for neighbor in neighbors_pos:
             min_distance = min([np.linalg.norm(np.array(predator) - np.array(neighbor), 1) for predator in
                                     self.predators_positions])
             distances.append(min_distance)
 
-        # Choose the action that maximizes the distance to the nearest predator
-        max_distance_idx = np.argmax(distances)
-        return action_to_neighbor[max_distance_idx]
+        if random.random() < 0.2:
+            random_idx = random.randint(0, len(action_to_neighbor) - 1)
+            return action_to_neighbor[random_idx]
+        else:
+            # choose the action that maximizes the distance to the nearest predator
+            max_distance_idx = np.argmax(distances)
+            return action_to_neighbor[max_distance_idx]
 
     def step(self, predators_actions):
         # update the position of preys
@@ -237,7 +241,7 @@ class PredatorsPrey(object):
             if int(distances) == self.num_predators - 1 or len(prey_empty_neigbours) == 0:
                 reward = 0
             else:
-                reward = -1
+                reward = -1 * distances
             
             if(terminal_flag):
                 reward = 100
@@ -259,7 +263,7 @@ class PredatorsPrey(object):
             if int(distances) == self.num_predators - 1 or len(prey_empty_neigbours) == 0:
                 reward = 0
             else:
-                reward = -1 * distances
+                reward = -1
                 
             if(terminal_flag):
                 reward = 100

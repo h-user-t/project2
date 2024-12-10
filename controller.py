@@ -35,7 +35,7 @@ class controller(object):
             agent.brain.model.fit(x, y, batch_size=len(x), sample_weight = None, epochs = 1, verbose = 0)
     
     def VDNreplay(self, agents):
-        print("Applying VDNreplay")
+        # print("Applying VDNreplay")
         y_list = []
         y_tot_list = []
         

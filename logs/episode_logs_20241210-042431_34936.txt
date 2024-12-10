@@ -1,0 +1,37 @@
+Experiment Parameters:
+agents_number: 2
+max_timestep: 100
+render: True
+preys_mode: 2
+game_mode: 1
+prioritization_scale: 0.5
+replay_steps: 10
+number_nodes: 256
+gpu_num: 2
+test: False
+Student_number: None
+recorder: False
+optimizer: RMSProp
+MARLAlgorithm: QMIX
+learning_rate: 5e-05
+batch_size: 32
+memory_capacity: 100
+reward_mode: 1
+episode_number: 30
+grid_size: 5
+first_step_memory: 0
+target_type: DQN
+max_random_moves: 0
+target_frequency: 10000
+gamma: 0.95
+maximum_exploration: 100000
+
+Episode 0, Score: -100, Final Step: 100, Goal: False
+Episode 1, Score: -100, Final Step: 100, Goal: False
+Episode 2, Score: -100, Final Step: 100, Goal: False
+Episode 3, Score: 85, Final Step: 16, Goal: True
+Episode 4, Score: 72, Final Step: 29, Goal: True
+Episode 5, Score: -100, Final Step: 100, Goal: False
+Episode 6, Score: -100, Final Step: 100, Goal: False
+Episode 7, Score: 86, Final Step: 15, Goal: True
+Episode 8, Score: -100, Final Step: 100, Goal: False

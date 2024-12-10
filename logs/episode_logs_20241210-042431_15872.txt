@@ -1,0 +1,58 @@
+Experiment Parameters:
+agents_number: 2
+max_timestep: 100
+render: True
+preys_mode: 2
+game_mode: 1
+prioritization_scale: 0.5
+replay_steps: 10
+number_nodes: 256
+gpu_num: 2
+test: False
+Student_number: None
+recorder: False
+optimizer: RMSProp
+MARLAlgorithm: VDN
+learning_rate: 5e-05
+batch_size: 32
+memory_capacity: 100
+reward_mode: 1
+episode_number: 30
+grid_size: 5
+first_step_memory: 0
+target_type: DQN
+max_random_moves: 0
+target_frequency: 10000
+gamma: 0.95
+maximum_exploration: 100000
+
+Episode 0, Score: 86, Final Step: 15, Goal: True
+Episode 1, Score: 4, Final Step: 97, Goal: True
+Episode 2, Score: 61, Final Step: 40, Goal: True
+Episode 3, Score: 89, Final Step: 12, Goal: True
+Episode 4, Score: -100, Final Step: 100, Goal: False
+Episode 5, Score: -100, Final Step: 100, Goal: False
+Episode 6, Score: -100, Final Step: 100, Goal: False
+Episode 7, Score: -100, Final Step: 100, Goal: False
+Episode 8, Score: 86, Final Step: 15, Goal: True
+Episode 9, Score: -100, Final Step: 100, Goal: False
+Episode 10, Score: -100, Final Step: 100, Goal: False
+Episode 11, Score: -100, Final Step: 100, Goal: False
+Episode 12, Score: -100, Final Step: 100, Goal: False
+Episode 13, Score: 12, Final Step: 89, Goal: True
+Episode 14, Score: -100, Final Step: 100, Goal: False
+Episode 15, Score: -100, Final Step: 100, Goal: False
+Episode 16, Score: -100, Final Step: 100, Goal: False
+Episode 17, Score: 89, Final Step: 12, Goal: True
+Episode 18, Score: 83, Final Step: 18, Goal: True
+Episode 19, Score: -100, Final Step: 100, Goal: False
+Episode 20, Score: -100, Final Step: 100, Goal: False
+Episode 21, Score: 76, Final Step: 25, Goal: True
+Episode 22, Score: -100, Final Step: 100, Goal: False
+Episode 23, Score: 92, Final Step: 9, Goal: True
+Episode 24, Score: -100, Final Step: 100, Goal: False
+Episode 25, Score: -100, Final Step: 100, Goal: False
+Episode 26, Score: 79, Final Step: 22, Goal: True
+Episode 27, Score: 95, Final Step: 6, Goal: True
+Episode 28, Score: -100, Final Step: 100, Goal: False
+Episode 29, Score: -100, Final Step: 100, Goal: False

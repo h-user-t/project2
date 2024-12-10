@@ -1,9 +1,7 @@
 import os
 import psutil  # To check memory and CPU usage dynamically
 from concurrent.futures import ThreadPoolExecutor
-import itertools
 import subprocess
-
 
 # Function to determine the number of CPU cores (compatible with Python 2.7)
 def get_cpu_count():
@@ -13,15 +11,14 @@ def get_cpu_count():
         # Fallback method for older psutil versions
         return psutil.NUM_CPUS
 
-
 # Function to determine the optimal number of workers
 def determine_optimal_workers():
     cpu_count = get_cpu_count()  # Total number of CPU cores
     memory_info = psutil.virtual_memory()  # System memory info
 
-    # Assume each worker requires 1GB of RAM
+    # Assume each worker requires 0.33 GB of RAM
     available_memory_gb = memory_info.available / (1024 ** 3)
-    memory_based_workers = int(available_memory_gb/0.33)  # One worker per GB of free memory
+    memory_based_workers = int(available_memory_gb)
 
     # Use half the CPU cores for workers to avoid overloading the system
     cpu_based_workers = max(1, cpu_count // 2)
@@ -34,24 +31,25 @@ def determine_optimal_workers():
 
     return optimal_workers
 
-
-# Define parameter options
+# Define a focused set of parameter options to fit 14 combinations
 parameters = {
-    'learning_rate': [0.0001, 0.0005, 0.001],
+    'episode_number': [30],                       # Fixed to 50 episodes as per your professor
+               # Two smaller learning rates for experimentation
+    'batch_size': [32],                          # Fixed batch size for simplicity
+    'agents_number': [2],                      # Test with 2 and 3 agents
+    'MARLAlgorithm': ['QMIX'],                     # Focus only on VDN as requested
+    'preys_mode': [1, 2],
     'optimizer': ['Adam', 'RMSProp'],
-    'batch_size': [32, 64, 128],
-    'agents_number': [2, 3],
-    'grid_size': [5, 10],
-    'gamma': [0.9, 0.95, 0.99],
-    'reward_mode': [0, 1],
-    'max_timestep': [100, 200],
-    'MARLAlgorithm': ['IQL', 'VDN', 'QMIX']
+    'grid_size': [5],                         # Two grid sizes for variety
+    'reward_mode': [1],                           # Use only reward mode 1 (full rewards)
+    'max_timestep': [100]                         # Fixed timesteps for uniform testing
 }
 
-# Create all combinations of parameters
-keys, values = zip(*parameters.items())
-combinations = [dict(zip(keys, v)) for v in itertools.product(*values)]
+# Generate combinations (limited to 14 by taking a subset)
+from itertools import product
 
+all_combinations = list(product(*parameters.values()))
+combinations = [dict(zip(parameters.keys(), values)) for values in all_combinations]
 
 # Function to run a single experiment
 def run_experiment(params, index):
@@ -73,7 +71,6 @@ def run_experiment(params, index):
         print("Experiment {}/{} completed successfully.".format(index + 1, len(combinations)))
     except Exception as e:
         print("Experiment {} failed with error: {}".format(index + 1, e))
-
 
 # Determine optimal number of workers
 optimal_workers = determine_optimal_workers()

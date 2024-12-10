@@ -13,7 +13,7 @@ from collections import deque
 from keras import backend as K
 from keras.optimizers import *
 from keras.models import Sequential, Model
-from keras.layers import Dense, Lambda, Input, Concatenate
+from keras.layers import Dense, Lambda, Input, Concatenate, BatchNormalization, Dropout, Multiply
 
 MAX_EPSILON = 1.0
 MIN_EPSILON = 0.01
@@ -44,51 +44,69 @@ class Brain(object):
         self.optimizer_model = arguments['optimizer']
         self.model = self.build_model()
         self.model_ = self.build_model()
+# THEIRS
+#     def build_model(self):
+#
+#         x = Input(shape=(self.state_size,))
+#         # design a neural netwrok model Q(s,a)
+#
+#
+#
+#
+#
+#         ###################################
+#         z = Dense(self.action_size, activation="linear")(x)
+#
+#         model = Model(inputs=x, outputs=z)
+#
+#         if self.optimizer_model == 'Adam':
+#             optimizer = Adam(lr=self.learning_rate, clipnorm=1.)
+#         elif self.optimizer_model == 'RMSProp':
+#             optimizer = RMSprop(lr=self.learning_rate, clipnorm=1.)
+#         else:
+#             print('Invalid optimizer!')
+#
+#         model.compile(loss=huber_loss, optimizer=optimizer)
+#
+#         if self.test:
+#             if not os.path.isfile(self.weight_backup):
+#                 print('Error:no file')
+#             else:
+#                 model.load_weights(self.weight_backup)
+#
+#         return model
 
-    # def build_model(self):
-    #
-    #     x = Input(shape=(self.state_size,))
-    #     # design a neural netwrok model Q(s,a)
-    #
-    #
-    #
-    #
-    #
-    #     ###################################
-    #     z = Dense(self.action_size, activation="linear")(x)
-    #
-    #     model = Model(inputs=x, outputs=z)
-    #
-    #     if self.optimizer_model == 'Adam':
-    #         optimizer = Adam(lr=self.learning_rate, clipnorm=1.)
-    #     elif self.optimizer_model == 'RMSProp':
-    #         optimizer = RMSprop(lr=self.learning_rate, clipnorm=1.)
-    #     else:
-    #         print('Invalid optimizer!')
-    #
-    #     model.compile(loss=huber_loss, optimizer=optimizer)
-    #
-    #     if self.test:
-    #         if not os.path.isfile(self.weight_backup):
-    #             print('Error:no file')
-    #         else:
-    #             model.load_weights(self.weight_backup)
-    #
-    #     return model
+# MINE
 
     def build_model(self):
+        # Input Layer
         x = Input(shape=(self.state_size,))
-        # design a neural network model Q(s,a)
 
-        # Add more layers to the neural network
-        h1 = Dense(128, activation="relu")(x)
+        attention = Dense(self.state_size, activation="softmax")(x)
+        weighted_x = Multiply()([x, attention])
+        # First Dense Layer with Batch Normalization and Dropout
+        h1 = Dense(128, activation="relu")(weighted_x)
+        h1 = BatchNormalization()(h1)
+        h1 = Dropout(0.3)(h1)
+
+        # Second Dense Layer
         h2 = Dense(128, activation="relu")(h1)
-        h3 = Dense(64, activation="relu")(h2)
-        h4 = Dense(32, activation="relu")(h3)
-        z = Dense(self.action_size, activation="linear")(h3)
+        h2 = BatchNormalization()(h2)
+        h2 = Dropout(0.3)(h2)
 
+        # Third Dense Layer
+        h3 = Dense(64, activation="relu")(h2)
+
+        # Fourth Dense Layer
+        h4 = Dense(32, activation="relu")(h3)
+
+        # Output Layer
+        z = Dense(self.action_size, activation="linear")(h4)
+
+        # Build the Model
         model = Model(inputs=x, outputs=z)
 
+        # Optimizer Setup
         if self.optimizer_model == 'Adam':
             optimizer = Adam(lr=self.learning_rate, clipnorm=1.)
         elif self.optimizer_model == 'RMSProp':
@@ -96,8 +114,10 @@ class Brain(object):
         else:
             print('Invalid optimizer!')
 
+        # Compile the Model
         model.compile(loss=huber_loss, optimizer=optimizer)
 
+        # Load Pre-Trained Weights (if in test mode)
         if self.test:
             if not os.path.isfile(self.weight_backup):
                 print('Error: no file')
@@ -105,6 +125,43 @@ class Brain(object):
                 model.load_weights(self.weight_backup)
 
         return model
+
+    # def build_model(self):
+    #     # Input layer
+    #     x = tf.keras.Input(shape=(self.state_size,), name="input")
+    #
+    #     # Fully connected layers
+    #     h1 = tf.layers.dense(x, 128, activation=tf.nn.relu)
+    #     h1 = tf.layers.batch_normalization(h1, training=True)
+    #     h1 = tf.layers.dropout(h1, rate=0.2, training=True)
+    #
+    #     h2 = tf.layers.dense(h1, 64, activation=tf.nn.relu)
+    #
+    #     # Output layer
+    #     z = tf.layers.dense(h2, self.action_size, activation=None)
+    #
+    #     # Define model
+    #     model = tf.keras.Model(inputs=x, outputs=z)
+    #
+    #     # Optimizer setup
+    #     if self.optimizer_model == 'Adam':
+    #         optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
+    #     elif self.optimizer_model == 'RMSProp':
+    #         optimizer = tf.train.RMSPropOptimizer(learning_rate=self.learning_rate)
+    #     else:
+    #         print('Invalid optimizer!')
+    #
+    #     # Compile the model
+    #     model.compile(loss=huber_loss, optimizer=optimizer)
+    #
+    #     # Load weights if in test mode
+    #     if self.test:
+    #         if not os.path.isfile(self.weight_backup):
+    #             print('Error: No weight file found!')
+    #         else:
+    #             model.load_weights(self.weight_backup)
+    #
+    #     return model
 
     def predict(self, state, target=False):
         if target:
